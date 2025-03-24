@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University CyberScan</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .breach-pulse {
+            animation: pulse 2s infinite;
+        }
+        .terminal-text {
+            font-family: 'Courier New', monospace;
+        }
+        .glow-blue {
+            text-shadow: 0 0 8px #3b82f6;
+        }
+        .glow-red {
+            text-shadow: 0 0 8px #ef4444;
+        }
+        .cyber-border {
+            border: 1px solid #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Main Card -->
+        <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden cyber-border">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-900 to-blue-600 p-5 text-center border-b border-blue-400">
+                <h1 class="text-2xl font-bold glow-blue">UNIVERSITY CYBERSCAN</h1>
+                <p class="text-blue-200 terminal-text">v2.3.1 - Breach Detection System</p>
+            </div>
+            
+            <!-- Form -->
+            <div class="p-6">
+                <div id="step1" class="animate-fadeIn">
+                    <div class="mb-6">
+                        <p class="text-gray-300 mb-3 terminal-text">> Have you changed your password since enrollment?</p>
+                        <div class="flex space-x-4 justify-center">
+                            <button onclick="showStep2('yes')" 
+                                    class="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">
+                                YES
+                            </button>
+                            <button onclick="showStep2('no')" 
+                                    class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition">
+                                NO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="step2" class="hidden animate-fadeIn">
+                    <form id="scanForm" onsubmit="checkBreach(event)">
+                        <div class="mb-4">
+                            <label class="block text-blue-400 mb-2 terminal-text">> Enter Roll Number:</label>
+                            <input type="text" id="rollNumber" 
+                                   class="w-full bg-gray-700 border border-blue-500 text-white px-4 py-3 rounded-lg terminal-text"
+                                   placeholder="e.g. 212010201" required>
+                        </div>
+                        <input type="hidden" id="passwordChanged">
+                        <button type="submit" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-bold transition glow-blue">
+                            EXECUTE SCAN
+                        </button>
+                    </form>
+                    <button onclick="backToStep1()" class="mt-3 text-blue-400 hover:text-blue-300 terminal-text">
+                        ← Back
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div id="result" class="px-6 pb-4"></div>
+            
+            <!-- Disclaimer Box -->
+            <div class="px-6 pb-4">
+                <div class="p-4 bg-gray-800/50 border border-gray-600 rounded-lg text-xs text-gray-400">
+                    <p class="mb-2">
+                        Disclaimer: All these data are collected from various parts of the internet. 
+                        This website only shows if your credentials were found in any data breaches. 
+                        If this shows pwned, please change the password for every account or you can 
+                        create an issue in 
+                        <a href="https://github.com/pregly/LogsSupport" 
+                           target="_blank"
+                           class="text-blue-400 hover:text-blue-300 underline transition">
+                            https://github.com/pregly/LogsSupport
+                        </a> 
+                        and let us know if you want them removed.
+                    </p>
+                    <p class="border-t border-gray-700 pt-2 mt-2 text-center">
+                        © 2024 JMH. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Footer -->
+        <div class="mt-6 text-center text-gray-500 text-xs terminal-text">
+            <p>© 2024 University Cybersecurity Team | All scans are logged</p>
+        </div>
+    </div>
+
+    <script>
+    // Database simulation (in real use, fetch from db/data.txt)
+    const database = [
+        "21011-003:Fahad1994%",
+        "23102-021:Mimduet175035.#",
+        "19072-002:Kalyan@1292",
+        "202020338:Raj890225@",
+        "212010017:BmAbdullah@2",
+        "212010084:S@kib&55",
+        "212010201:Tuhin7412#",
+        "212020139:22239"
+    ];
+
+    // Form navigation
+    function showStep2(answer) {
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        document.getElementById('passwordChanged').value = answer;
+    }
+
+    function backToStep1() {
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('result').innerHTML = '';
+    }
+
+    // Breach check function
+    function checkBreach(event) {
+        event.preventDefault();
+        
+        const rollNumber = document.getElementById('rollNumber').value.trim();
+        const passwordChanged = document.getElementById('passwordChanged').value;
+        const resultDiv = document.getElementById('result');
+        
+        // Clear previous results
+        resultDiv.innerHTML = '';
+        
+        // Show scanning animation
+        resultDiv.innerHTML = `
+            <div class="terminal-text text-blue-400 my-4">
+                > Scanning breach database...
+                <span class="dot-animation">.</span>
+            </div>
+        `;
+        
+        // Start dot animation
+        let dots = 0;
+        const dotInterval = setInterval(() => {
+            dots = (dots + 1) % 4;
+            document.querySelector('.dot-animation').textContent = '.'.repeat(dots);
+        }, 500);
+        
+        // Simulate database check
+        setTimeout(() => {
+            clearInterval(dotInterval);
+            
+            if (passwordChanged === 'yes') {
+                // If user changed password, show historical breach warning
+                resultDiv.innerHTML = `
+                    <div class="bg-red-900/50 border border-red-500 p-4 rounded-lg mt-4 breach-pulse">
+                        <div class="flex items-center text-red-400 terminal-text">
+                            <span class="glow-red">⚠️ BREACH DETECTED (Historical Data)</span>
+                        </div>
+                        <div class="mt-3 bg-gray-700/50 p-3 rounded border border-gray-600 terminal-text">
+                            <p>Your credentials were previously compromised.</p>
+                            <p class="mt-2 text-sm">Even with password change, we recommend:</p>
+                            <ul class="list-disc list-inside text-xs mt-1">
+                                <li>Enabling 2FA</li>
+                                <li>Monitoring account activity</li>
+                                <li>Using unique passwords</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // If user didn't change password, check database
+                const foundEntry = database.find(entry => entry.startsWith(rollNumber + ':'));
+                
+                if (foundEntry) {
+                    const [, password] = foundEntry.split(':');
+                    resultDiv.innerHTML = `
+                        <div class="bg-red-900/50 border border-red-500 p-4 rounded-lg mt-4 breach-pulse">
+                            <div class="flex items-center text-red-400 terminal-text">
+                                <span class="glow-red">⚠️ ACTIVE BREACH DETECTED!</span>
+                            </div>
+                            <div class="mt-3 bg-gray-700/50 p-3 rounded border border-gray-600 terminal-text">
+                                <p>Roll Number: <span class="font-bold">${rollNumber}</span></p>
+                                <p class="mt-1">Compromised Password: <span class="font-mono">${password}</span></p>
+                                <p class="mt-3 text-sm text-red-300">Immediately change your password at the university portal.</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="bg-green-900/50 border border-green-500 p-4 rounded-lg mt-4">
+                            <div class="flex items-center text-green-400 terminal-text">
+                                <span class="glow-blue">✓ NO BREACH DETECTED</span>
+                            </div>
+                            <p class="mt-2 text-sm">Your credentials are not in our breach database.</p>
+                        </div>
+                    `;
+                }
+            }
+        }, 1500);
+    }
+    </script>
+</body>
+</html>
